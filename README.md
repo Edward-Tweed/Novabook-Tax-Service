@@ -20,7 +20,7 @@ This project follows **strict validation, clear logging, and structured API desi
 1. **Clone the Repository**
 
    ```sh
-   git clone [<repository-url>](https://github.com/Edward-Tweed/Novabook-Tax-Service)
+   git clone https://github.com/Edward-Tweed/Novabook-Tax-Service
    cd novabook-tax-service
    ```
 
