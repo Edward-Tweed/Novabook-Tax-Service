@@ -1,9 +1,9 @@
 import { useState, ChangeEvent } from "react";
 
 interface SaleItem {
-  itemId: string | number;
-  cost: string | number;
-  taxRate: string | number;
+  itemId: string;
+  cost: number | "";
+  taxRate: number | "";
 }
 
 interface Transaction {
@@ -11,7 +11,7 @@ interface Transaction {
   date: string;
   invoiceId?: string;
   items?: SaleItem[];
-  paymentAmount?: string | number;
+  paymentAmount?: string;
 }
 
 export default function Home() {
@@ -32,13 +32,6 @@ export default function Home() {
     items: [{ itemId: "", cost: "", taxRate: "" }],
   };
 
-  const initialAmendment: Transaction = {
-    eventType: "SALES",
-    date: "",
-    invoiceId: "",
-    items: [{ itemId: "", cost: "", taxRate: "" }],
-  };
-
   const initialTaxPayment: Transaction = {
     eventType: "TAX_PAYMENT",
     date: "",
@@ -49,7 +42,7 @@ export default function Home() {
     ...initialTransaction,
   });
   const [amendment, setAmendment] = useState<Transaction>({
-    ...initialAmendment,
+    ...initialTransaction,
   });
   const [taxPayment, setTaxPayment] = useState<Transaction>({
     ...initialTaxPayment,
@@ -78,7 +71,7 @@ export default function Home() {
           : parseFloat(e.target.value)
         : e.target.value;
 
-    updatedItems[index][e.target.name as keyof SaleItem] = value;
+    updatedItems[index][e.target.name] = value as SaleItem[keyof SaleItem];
 
     setState({ ...state, items: updatedItems });
   };
@@ -136,7 +129,7 @@ export default function Home() {
       setApiResponse({ success: res.ok, data });
 
       if (res.ok) {
-        if (method === "PATCH") clearForm(setAmendment, initialAmendment);
+        if (method === "PATCH") clearForm(setAmendment, initialTransaction);
         else if (method === "GET") setQueryDate("");
         else if (method === "POST" && body?.eventType === "TAX_PAYMENT")
           clearForm(setTaxPayment, initialTaxPayment);
@@ -230,7 +223,7 @@ export default function Home() {
             onChange={(e) => handleInputChange(e, setTransaction, transaction)}
           />
           {transaction.items?.map((item, index) => (
-            <div key={`transaction_${index}`} className="flex gap-2 mb-2">
+            <div key={index} className="flex gap-2 mb-2">
               <input
                 className="border p-2 w-1/3"
                 type="text"
@@ -289,7 +282,7 @@ export default function Home() {
           </button>
           <button
             className="bg-gray-400 text-white p-2 w-full mt-2"
-            onClick={() => clearForm(setTransaction, initialTransaction)}
+            onClick={() => clearForm(setTransaction)}
           >
             Clear
           </button>
@@ -315,7 +308,7 @@ export default function Home() {
             onChange={(e) => handleInputChange(e, setAmendment, amendment)}
           />
           {amendment.items?.map((item, index) => (
-            <div key={`amendment_${index}`} className="flex gap-2 mb-2">
+            <div key={index} className="flex gap-2 mb-2">
               <input
                 className="border p-2 w-1/3"
                 type="text"
@@ -372,7 +365,7 @@ export default function Home() {
           </button>
           <button
             className="bg-gray-400 text-white p-2 w-full mt-2"
-            onClick={() => clearForm(setAmendment, initialAmendment)}
+            onClick={() => clearForm(setAmendment)}
           >
             Clear
           </button>

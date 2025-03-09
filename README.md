@@ -1,40 +1,171 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# **Novabook Tax Service**
 
-## Getting Started
+## **📌 Overview**
 
-First, run the development server:
+Novabook Tax Service is a lightweight, in-memory API with a frontend interface designed to:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Record sales transactions and tax payments**
+- **Compute the tax position at any given date**
+- **Handle sales amendments, even if the original transaction is missing**
+- **Operate fully offline with no external dependencies or databases**
+
+This project follows **strict validation, clear logging, and structured API design** to meet the Novabook technical task requirements.
+
+---
+
+## **⚡️ Getting Started**
+
+### **🔧 Setup Instructions**
+
+1. **Clone the Repository**
+
+   ```sh
+   git clone <repository-url>
+   cd novabook-tax-service
+   ```
+
+2. **Install Dependencies**
+
+   ```sh
+   npm install
+   ```
+
+3. **Run the Development Server**
+
+   ```sh
+   npm run dev
+   ```
+
+   The app will be available at: **`http://localhost:3000`**
+
+---
+
+## **🛠 API Endpoints**
+
+### **1. Record a Transaction**
+
+#### **`POST /api/transactions`**
+
+- Records **sales transactions** and **tax payments**.
+
+**Example Request (Sales Transaction):**
+
+```json
+{
+  "eventType": "SALES",
+  "date": "2024-02-01T12:00:00Z",
+  "invoiceId": "INV100",
+  "items": [{ "itemId": "A1", "cost": 100, "taxRate": 0.2 }]
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Example Request (Tax Payment):**
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```json
+{
+  "eventType": "TAX_PAYMENT",
+  "date": "2024-02-05T12:00:00Z",
+  "paymentAmount": 5000
+}
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+**Response:**
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+```json
+{
+  "message": "Transaction received"
+}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+### **2. Retrieve Tax Position**
 
-To learn more about Next.js, take a look at the following resources:
+#### **`GET /api/tax-position?date=YYYY-MM-DDTHH:mm:ssZ`**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+- Returns **total sales tax collected minus tax payments** up to the given date.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Example Request:**
 
-## Deploy on Vercel
+```sh
+curl -X GET "http://localhost:3000/api/tax-position?date=2024-02-06T23:59:59Z"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Example Response:**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+```json
+{
+  "date": "2024-02-06T23:59:59Z",
+  "taxPosition": 120
+}
+```
+
+---
+
+### **3. Amend a Sales Transaction**
+
+#### **`PATCH /api/sale`**
+
+- Updates an **existing sale** or **stores an amendment if the sale does not exist yet**.
+
+**Example Request:**
+
+```json
+{
+  "eventType": "SALES",
+  "date": "2024-02-01T12:00:00Z",
+  "invoiceId": "INV100",
+  "items": [{ "itemId": "A1", "cost": 200, "taxRate": 0.15 }]
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Sale amendment received"
+}
+```
+
+---
+
+## **📜 Assumptions & Design Choices**
+
+✔ **Transactions & amendments are stored in memory** (No database required).\
+✔ **Sales tax is calculated as:** `cost * taxRate`.\
+✔ **Tax position is the net of sales tax collected minus tax payments.**\
+✔ **Sales amendments can be applied before the original transaction exists.**\
+✔ **Validation enforces correct data formats (ISO date, numeric values, etc.).**\
+✔ **No authentication or user management is required.**
+
+---
+
+## **📌 Error Handling**
+
+| **Scenario**                | **Error Message**                       | **Status Code** |
+| --------------------------- | --------------------------------------- | --------------- |
+| **Invalid HTTP Method**     | `"Method Not Allowed"`                  | `405`           |
+| **Missing Required Fields** | `"Missing invoiceId in sale amendment"` | `400`           |
+| **Invalid Event Type**      | `"Unknown event type"`                  | `400`           |
+| **Invalid Date Format**     | `"Invalid date format"`                 | `400`           |
+
+---
+
+## **🚀 Frontend Instructions**
+
+The project includes a frontend for interacting with the API. To start the UI:
+
+1. **Run the frontend:**
+
+   ```sh
+   npm run dev
+   ```
+
+2. **Functionality Overview:**
+
+   - Record new sales transactions.
+   - Amend existing sales transactions.
+   - Pay tax and update tax position.
+   - Query tax position on a specific date.
+
+---
